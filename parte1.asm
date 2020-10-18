@@ -11,11 +11,11 @@ model small								;declaracion de modelo
 	contadorC DB 00h
 	contadorD DB 00h
 	contadorU DB 00h
-	;mes DB 00h
-	;dia DB 00h
+	mes DB 00h
+	dia DB 00h
 	carry DW 00h
 	i DW 00h
-	x DB 00h
+	x DW 00h
 	largo DW 01h
 	
 .stack						
@@ -28,6 +28,9 @@ program:
 
 	MOV AH,2AH   							; se obtiene la fecha del sistema
 	INT 21H
+	
+	MOV mes, DH								;guardar el mes
+	MOV dia, DL								;guardar el dia
 	
 	SUB CX,7B2h
 	
@@ -42,34 +45,32 @@ program:
 	MOV [SI], BL
 	INC SI
 	
-	MOV BL, contadorD
+	MOV BL, contadorD						;pasar las decenas al resultado de los años
 	MOV [SI], BL
 	INC SI
 	
-	MOV BL, contadorC
+	MOV BL, contadorC						; pasar las centenas al resultado de los años
 	MOV [SI], BL
 	
-	LEA SI, years
-	MOV AH,02h              
-	MOV DL, [SI]
-	ADD DL, 30h	
-	INT 21h
-	INC SI
+	MOV x,16Dh								; el numero por el que se va multiplicar 
+	MOV largo, 03h							; el largo del resultado
+	LEA SI, years							
+	CALL MULTIPLICAR
 	
-	MOV AH,02h              
-	MOV DL, [SI]
-	ADD DL, 30h	
-	INT 21h
-	INC SI
+	MOV x,18h
+	LEA SI, years							
+	CALL MULTIPLICAR
 	
-	MOV AH,02h              
-	MOV DL, [SI]
-	ADD DL, 30h	
-	INT 21h
+	MOV x,03Ch
+	LEA SI, years							
+	CALL MULTIPLICAR
+	
+	MOV x,03Ch
+	LEA SI, years							
+	CALL MULTIPLICAR
 	
 	
-
-	
+	CALL IMPRIMIR
 
 	JMP finalizar
 	
@@ -79,12 +80,12 @@ program:
 	MULTIPLICAR PROC NEAR
 		MOV i, 00h						; inicializar variables
 		MOV carry, 00h
-		;LEA SI, resultadoTemp
+	
 		ciclo2:
 			XOR AX,AX					;limpiar registros
 			XOR BX,BX
 			
-			MOV AL,x					;multiplicar el contador con el resultado que se lleva
+			MOV AX,x					;multiplicar el contador con el resultado que se lleva
 			MOV BL,[SI]
 			MUL BX
 			ADD AX,carry				; sumarle el carry 	
@@ -166,7 +167,35 @@ program:
 
 	RET
 	SEPARAR ENDP
-
+	
+	IMPRIMIR PROC 
+		MOV x,00h							;inicializar variables
+		LEA SI, years
+		ciclo4:
+			XOR AX,AX						;limpiar registros
+			MOV AL,[SI]						; mover a al si 
+			CMP AL,24h						; comparar que no sea $
+			JE decrementar					; se va a imprimir
+			INC SI							;incrementar registros
+			INC x
+		JMP ciclo4
+		decrementar:						;decrementar
+			DEC SI	
+		ciclo5:
+			XOR AX,AX						;limpiar registros
+			MOV AX, x						; mover contador a al
+			CMP AL,00h						; comparar que no se 0
+			JE final 						; salirser del ciclo
+			MOV AH,02h						; imprimir caracter
+			MOV DL,[SI]
+			ADD DL,30h
+			INT 21h
+			DEC x							;decrementar variables
+			DEC SI
+		JMP ciclo5
+		final:
+	RET
+	IMPRIMIR ENDP
 
 
 	;finalizar el programa
