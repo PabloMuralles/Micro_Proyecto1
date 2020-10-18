@@ -3,7 +3,7 @@ model small								;declaracion de modelo
  
 	timeStamp DB 500 DUP('$') 
 	years DB 500 DUP('$') 
-	moths DB 500 DUP('$') 
+	months DB 500 DUP('$') 
 	days DB 500 DUP('$') 
 	horas DB 500 DUP('$') 
 	minutos DB 500 DUP('$') 
@@ -31,9 +31,10 @@ program:
 	
 	MOV mes, DH								;guardar el mes
 	MOV dia, DL								;guardar el dia
-	
-	SUB CX,7B2h
-	
+
+;----------------------------------------------calcular la diferencia de años y pasarla a segundos ------------------------------------------------------------------------
+
+	SUB CX,7B2h								; restar a los años los años de la fecha base
 	
 	XOR BX, BX								;limpiar registros
 	
@@ -69,9 +70,97 @@ program:
 	LEA SI, years							
 	CALL MULTIPLICAR
 	
-	
+	LEA SI, years
 	CALL IMPRIMIR
+	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
+	
+;----------------------------------------------calcular la diferencia de meses y pasarla a segundos ------------------------------------------------------------------------
 
+	SUB mes,01h
+	
+	XOR BX,BX									;limpiar registros
+	;falta validar si es 0
+	MOV BL,mes
+	CALL SEPARAR
+	
+	LEA SI,months							;instanciar
+	MOV BL, contadorU						;pasar las unidades al resultado de los años
+	MOV [SI], BL
+	INC SI
+	
+	MOV BL, contadorD						;pasar las decenas al resultado de los años
+	MOV [SI], BL
+	INC SI
+	
+	MOV BL, contadorC						; pasar las centenas al resultado de los años
+	MOV [SI], BL
+	
+	MOV x,01Eh								; el numero por el que se va multiplicar, de dias a minutos 1 min es 86400 segundos
+	MOV largo, 03h							; el largo del resultado
+	LEA SI, months							
+	CALL MULTIPLICAR
+	
+	MOV x,18h
+	LEA SI, months							
+	CALL MULTIPLICAR
+	
+	MOV x,03Ch
+	LEA SI, months							
+	CALL MULTIPLICAR
+	
+	MOV x,03Ch
+	LEA SI, months							
+	CALL MULTIPLICAR
+	
+	LEA SI, months
+	CALL IMPRIMIR
+	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
+;----------------------------------------------calcular la diferencia de dias y pasarla a segundos ------------------------------------------------------------------------
+	
+	SUB dia,01h
+	
+	XOR BX,BX									;limpiar registros
+	;falta validar si es 0
+	MOV BL,dia
+	CALL SEPARAR
+	
+	LEA SI,days								;instanciar
+	MOV BL, contadorU						;pasar las unidades al resultado de los años
+	MOV [SI], BL
+	INC SI
+	
+	MOV BL, contadorD						;pasar las decenas al resultado de los años
+	MOV [SI], BL
+	INC SI
+	
+	MOV BL, contadorC						; pasar las centenas al resultado de los años
+	MOV [SI], BL
+	
+	MOV x,18h								; el numero por el que se va multiplicar, de dias a minutos 1 min es 86400 segundos
+	MOV largo, 03h							; el largo del resultado
+	LEA SI, days							
+	CALL MULTIPLICAR
+	
+	MOV x,03Ch
+	LEA SI, days							
+	CALL MULTIPLICAR
+	
+	MOV x,03Ch
+	LEA SI, days							
+	CALL MULTIPLICAR
+	
+	LEA SI, days
+	CALL IMPRIMIR
+	
+	
 	JMP finalizar
 	
 	
@@ -170,7 +259,6 @@ program:
 	
 	IMPRIMIR PROC 
 		MOV x,00h							;inicializar variables
-		LEA SI, years
 		ciclo4:
 			XOR AX,AX						;limpiar registros
 			MOV AL,[SI]						; mover a al si 
