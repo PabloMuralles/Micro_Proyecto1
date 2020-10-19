@@ -1,7 +1,10 @@
-model small								;declaracion de modelo
+ model small								;declaracion de modelo
 .data										;inicia segmento de datos
  
-	timeStamp DB 500 DUP('$') 
+	UUID DB 500 DUP('$') 
+	timeStamp1 DB 500 DUP('$') 
+	timeStamp2 DB 500 DUP('$') 
+	timeStamp3 DB 500 DUP('$') 
 	years DB 500 DUP('$') 
 	months DB 500 DUP('$') 
 	days DB 500 DUP('$') 
@@ -28,10 +31,75 @@ program:
 	MOV AX,@DATA							;obtenemos la direccion de inicio
 	MOV DS,AX								; iniciliza el segmento de datos
 	
+	CALL CALCULAR							; se calcula el primer timestamp
+	
+	LEA SI, years
+	CALL IMPRIMIR
+
+	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
+	
+	LEA SI, timeStamp1
+	LEA DI, years
+	CALL COPIAR
+
+	LEA SI,timeStamp1
+	CALL IMPRIMIR
+	
 	CALL CALCULAR
- 
+	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
+	
+	LEA SI, timeStamp2
+	LEA DI, years
+	CALL COPIAR
+
+	LEA SI,timeStamp2
+	CALL IMPRIMIR
+	
+	CALL CALCULAR
+	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
+	
+	LEA SI, timeStamp3
+	LEA DI, years
+	CALL COPIAR
+
+	LEA SI,timeStamp3
+	CALL IMPRIMIR
 	
 	JMP finalizar
+	
+	
+	COPIAR PROC 
+		; SI es la cadena donde se va guardar el timestamp
+		ciclo8:
+		XOR AX,AX							;limpiar registros
+		XOR BX,BX
+		
+		MOV AL, [DI]
+		MOV [SI], AL						;almcenar el time timestamp en UUID
+		
+		INC SI
+		INC DI
+		
+		MOV BL, [DI]						; verificar si se llego al final de la cadena
+		CMP BL, 24h
+		JNE ciclo8
+		
+	RET
+	COPIAR ENDP
+
+
 	
 	CALCULAR PROC 
 	
@@ -130,12 +198,12 @@ program:
 		
 	;---------------------------------------------- tomar captura de la hora de la computadora------------------------------------------------------------------------	
 		
-		
 		MOV AH,2CH    								; obtenemos la hora del sistema
 		INT 21H
 		
 		MOV minuto, CL								;se guardar los tiempor en variables
 		MOV segundo, DH
+		
 	;---------------------------------------------- calcular la diferencia en hora a segundos------------------------------------------------------------------------	
 
 		XOR BX,BX									;limpiar registros
@@ -197,9 +265,6 @@ program:
 		LEA SI, years
 		LEA DI, segundos
 		CALL SUMAR
-		
-		LEA SI, years
-		CALL IMPRIMIR
 		
 	RET
 	CALCULAR ENDP
