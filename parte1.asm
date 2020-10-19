@@ -35,47 +35,36 @@ program:
 	
 	LEA SI, years
 	CALL IMPRIMIR
-
 	
 	;imprimir salto de linea
 	MOV DL, 0AH
 	MOV AH, 02h
 	INT 21h
 	
-	LEA SI, timeStamp1
+	LEA SI, UUID							;se copia el timestamp en el uuid por primera vez
 	LEA DI, years
 	CALL COPIAR
-
-	LEA SI,timeStamp1
-	CALL IMPRIMIR
 	
-	CALL CALCULAR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
-	
-	LEA SI, timeStamp2
-	LEA DI, years
+	LEA SI, UUID							; se busca donde termna la cadena uuid
+	CALL ENCONTRAR
+	LEA DI, years							;se copia el timestamp en el uuid por segunda vez
 	CALL COPIAR
-
-	LEA SI,timeStamp2
-	CALL IMPRIMIR
 	
-	CALL CALCULAR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
-	
-	LEA SI, timeStamp3
-	LEA DI, years
+	LEA SI, UUID							; se busca donde termna la cadena uuid
+	CALL ENCONTRAR
+	LEA DI, years							;se copia el timestamp en el uuid por tercera vez
 	CALL COPIAR
-
-	LEA SI,timeStamp3
+	
+	LEA SI, UUID							; se busca donde termna la cadena uuid
+	CALL ENCONTRAR
+	LEA DI, years							;se copia el timestamp en el uuid por cuarta vez
+	CALL COPIAR
+	
+	LEA SI, UUID
 	CALL IMPRIMIR
+	
+
+
 	
 	JMP finalizar
 	
@@ -98,6 +87,24 @@ program:
 		
 	RET
 	COPIAR ENDP
+	
+	ENCONTRAR PROC 
+		; SI es la cadena donde se encuentra el uuid
+		ciclo9:
+			XOR AX,AX							;limpiar registros
+			
+			MOV AL, [SI]
+			CMP AL, 24h
+			JE retornar
+			
+			INC SI
+			INC DI
+			JMP ciclo9
+			
+		retornar:
+		
+	RET
+	ENCONTRAR ENDP
 
 
 	
