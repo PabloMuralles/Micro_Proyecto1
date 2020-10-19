@@ -1,4 +1,4 @@
- model small								;declaracion de modelo
+model small								;declaracion de model
 .data										;inicia segmento de datos
  
 	UUID DB 500 DUP('$') 
@@ -23,6 +23,8 @@
 	x DW 00h
 	largo DW 01h
 	contSuma DB 00h
+	contUUI DB 01h
+	TEMP DB 01h
 	
 .stack						
 .code 
@@ -60,8 +62,67 @@ program:
 	LEA DI, years							;se copia el timestamp en el uuid por cuarta vez
 	CALL COPIAR
 	
+	
+	XOR CX,CX 
+	;MOV CL, 09h		
+	MOV CL, 24h		
+	
 	LEA SI, UUID
-	CALL IMPRIMIR
+	
+	ciclo10:
+		XOR AX,AX 								;limpiar registros
+		XOR BX,BX				
+		XOR DX,DX
+		
+		CMP CL,1Ch
+        JE signo
+        
+        CMP CL,17h
+        JE signo
+        
+        CMP CL,12h
+        JE signo
+        
+        CMP CL,0Dh
+        JE signo
+        JNE procedimiento
+        
+        signo:
+		MOV AH, 02h								; se imprimir el guion
+		MOV DL, 02Dh		
+		INT 21h
+		JMP continuar
+  
+        
+        
+        procedimiento:
+        MOV AL,[SI]
+		;MOV TEMP, AL
+		MOV BL,contUUI
+		MUL BL
+		
+		XOR BX,BX
+		MOV BL,10h
+		
+		DIV BL
+		
+		XOR BX,BX
+		MOV BL,AH
+		
+		CALL SEPARAR
+		
+		MOV AH, 02h								
+		MOV DL, contadorU	
+		ADD DL, 30h		
+		INT 21h
+        
+        continuar:
+		INC SI
+		INC contUUI
+	
+	
+	
+	LOOP ciclo10
 	
 
 
