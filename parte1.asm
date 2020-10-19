@@ -17,6 +17,7 @@ model small								;declaracion de modelo
 	i DW 00h
 	x DW 00h
 	largo DW 01h
+	contSuma DB 00h
 	
 .stack						
 .code 
@@ -31,6 +32,8 @@ program:
 	
 	MOV mes, DH								;guardar el mes
 	MOV dia, DL								;guardar el dia
+	
+	
 
 ;----------------------------------------------calcular la diferencia de años y pasarla a segundos ------------------------------------------------------------------------
 
@@ -160,6 +163,23 @@ program:
 	LEA SI, days
 	CALL IMPRIMIR
 	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
+	
+;----------------------------------------------sumar cadenas------------------------------------------------------------------------	
+
+	LEA SI, years
+	LEA DI, months
+	CALL SUMAR
+	
+	LEA SI, years
+	LEA DI, days
+	CALL SUMAR
+	
+	LEA SI, years
+	CALL IMPRIMIR
 	
 	JMP finalizar
 	
@@ -284,6 +304,112 @@ program:
 		final:
 	RET
 	IMPRIMIR ENDP
+	
+ 
+	
+	SUMAR PROC 
+		;SI va ser el numero mas grande
+		MOV carry, 00h
+		MOV contSuma,00h
+		ciclo6:
+			XOR AX,AX					;limpiar registros
+			XOR BX,BX
+			XOR DX,DX
+			
+			MOV DL,[SI]					
+			CMP DL,24h
+			JE incrementar1
+			JMP opcion2
+			
+			incrementar1:
+				INC contSuma
+			
+			opcion2:
+			MOV DH,[DI]
+			CMP DH,24h
+			JE incrementar2
+			JMP verificar
+			
+			incrementar2:
+				INC contSuma
+			
+			
+			verificar:
+				MOV BL,contSuma
+				CMP BL, 00h
+				JE sumar2
+				CMP BL, 01h
+				JE sumar1
+				JMP ciclo7
+				
+			sumar1:
+				MOV AL,[SI]
+				ADD AX,carry				; sumarle el carry 	
+				
+				XOR DX,DX					; limpiar registros
+				XOR BX,BX	
+				
+				XOR DX,DX					; limpiar registros
+				XOR BX,BX			
+			
+				MOV BX, 0Ah					; dividir entre 10 para poder calcular cual se pone en el resutlado y cual se almacena en carry
+				DIV BX		
+				
+				MOV carry, AX				; el mood se le coloca a el resultado y el div al carry 
+				MOV [SI], DL	
+				
+				INC DI
+				INC SI
+			
+				JMP Fin
+				
+			sumar2:
+				MOV AL,[DI]					;multiplicar el contador con el resultado que se lleva
+				MOV BL,[SI]
+				ADD AL,BL
+				ADD AX,carry				; sumarle el carry 	
+				
+				XOR DX,DX					; limpiar registros
+				XOR BX,BX			
+				
+				MOV BX, 0Ah					; dividir entre 10 para poder calcular cual se pone en el resutlado y cual se almacena en carry
+				DIV BX		
+				
+				MOV carry, AX				; el mood se le coloca a el resultado y el div al carry 
+				MOV [SI], DL	
+				
+				INC DI
+				INC SI
+				
+				JMP Fin
+			Salir:
+				JMP ciclo7
+			Fin:
+	
+		JMP ciclo6	
+		ciclo7:
+			XOR AX,AX
+			
+			MOV AX, carry					;verificar que el carry sea distinto a 0
+
+			CMP AL, 00h
+			JE terminar1		
+			
+			INC SI							; incrementar el si para poder poner el carry
+			
+			XOR BX,BX						; limpiar registro
+			XOR DX,DX 	
+			
+			MOV BX, 0Ah						;por si el carry es mayor a 10 ir poniendo solo los digitos con el mood y div
+			DIV BX		
+			
+			MOV carry, AX					; el mood se pone al si y el div se pone al carry
+			MOV [SI], DL
+	
+		JMP	ciclo7 
+		terminar1:
+	RET
+	SUMAR ENDP
 
 
 	;finalizar el programa
