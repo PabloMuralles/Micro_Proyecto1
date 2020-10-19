@@ -45,16 +45,8 @@ program:
 	CALL SEPARAR							; la diferencia pasarla a digitos por medio de los contadores
 	
 	LEA SI,years							;instanciar
-	MOV BL, contadorU						;pasar las unidades al resultado de los años
-	MOV [SI], BL
-	INC SI
 	
-	MOV BL, contadorD						;pasar las decenas al resultado de los años
-	MOV [SI], BL
-	INC SI
-	
-	MOV BL, contadorC						; pasar las centenas al resultado de los años
-	MOV [SI], BL
+	CALL ASIGNAR
 	
 	MOV x,16Dh								; el numero por el que se va multiplicar 
 	MOV largo, 03h							; el largo del resultado
@@ -91,16 +83,7 @@ program:
 	CALL SEPARAR
 	
 	LEA SI,months							;instanciar
-	MOV BL, contadorU						;pasar las unidades al resultado de los años
-	MOV [SI], BL
-	INC SI
-	
-	MOV BL, contadorD						;pasar las decenas al resultado de los años
-	MOV [SI], BL
-	INC SI
-	
-	MOV BL, contadorC						; pasar las centenas al resultado de los años
-	MOV [SI], BL
+	CALL ASIGNAR
 	
 	MOV x,01Eh								; el numero por el que se va multiplicar, de dias a minutos 1 min es 86400 segundos
 	MOV largo, 03h							; el largo del resultado
@@ -136,13 +119,7 @@ program:
 	CALL SEPARAR
 	
 	LEA SI,days								;instanciar
-	MOV BL, contadorU						;pasar las unidades al resultado de los años
-	MOV [SI], BL
-	INC SI
-	
-	MOV BL, contadorD						;pasar las decenas al resultado de los años
-	MOV [SI], BL
-	INC SI
+	CALL ASIGNAR
 	
 	MOV BL, contadorC						; pasar las centenas al resultado de los años
 	MOV [SI], BL
@@ -168,7 +145,7 @@ program:
 	MOV AH, 02h
 	INT 21h
 	
-;----------------------------------------------sumar cadenas------------------------------------------------------------------------	
+;----------------------------------------------sumar cadenas ------------------------------------------------------------------------	
 
 	LEA SI, years
 	LEA DI, months
@@ -180,6 +157,7 @@ program:
 	
 	LEA SI, years
 	CALL IMPRIMIR
+ 
 	
 	JMP finalizar
 	
@@ -410,6 +388,20 @@ program:
 		terminar1:
 	RET
 	SUMAR ENDP
+	
+	ASIGNAR PROC 
+		MOV BL, contadorU						;pasar las unidades al resultado de los años
+		MOV [SI], BL
+		INC SI
+		
+		MOV BL, contadorD						;pasar las decenas al resultado de los años
+		MOV [SI], BL
+		INC SI
+		
+		MOV BL, contadorC						; pasar las centenas al resultado de los años
+		MOV [SI], BL
+	RET
+	ASIGNAR ENDP
 
 
 	;finalizar el programa
