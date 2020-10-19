@@ -27,227 +27,182 @@ model small								;declaracion de modelo
 program: 
 	MOV AX,@DATA							;obtenemos la direccion de inicio
 	MOV DS,AX								; iniciliza el segmento de datos
- 
-
-	MOV AH,2AH   							; se obtiene la fecha del sistema
-	INT 21H
 	
-	MOV mes, DH								;guardar el mes
-	MOV dia, DL								;guardar el dia
-	
-	
-
-;----------------------------------------------calcular la diferencia de años y pasarla a segundos ------------------------------------------------------------------------
-
-	SUB CX,7B2h								; restar a los años los años de la fecha base
-	
-	XOR BX, BX								;limpiar registros
-	
-	MOV BL,CL								;mover la diferencia para poder guardarla en la cadena
-	CALL SEPARAR							; la diferencia pasarla a digitos por medio de los contadores
-	
-	LEA SI,years							;instanciar
-	
-	CALL ASIGNAR
-	
-	MOV x,16Dh								; el numero por el que se va multiplicar 
-	MOV largo, 03h							; el largo del resultado
-	LEA SI, years							
-	CALL MULTIPLICAR
-	
-	MOV x,18h
-	LEA SI, years							
-	CALL MULTIPLICAR
-	
-	MOV x,03Ch
-	LEA SI, years							
-	CALL MULTIPLICAR
-	
-	MOV x,03Ch
-	LEA SI, years							
-	CALL MULTIPLICAR
-	
-	LEA SI, years
-	CALL IMPRIMIR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
-	
-;----------------------------------------------calcular la diferencia de meses y pasarla a segundos ------------------------------------------------------------------------
-
-	SUB mes,01h
-	
-	XOR BX,BX									;limpiar registros
-	;falta validar si es 0
-	MOV BL,mes
-	CALL SEPARAR
-	
-	LEA SI,months							;instanciar
-	CALL ASIGNAR
-	
-	MOV x,01Eh								; el numero por el que se va multiplicar, de dias a minutos 1 min es 86400 segundos
-	MOV largo, 03h							; el largo del resultado
-	LEA SI, months							
-	CALL MULTIPLICAR
-	
-	MOV x,18h
-	LEA SI, months							
-	CALL MULTIPLICAR
-	
-	MOV x,03Ch
-	LEA SI, months							
-	CALL MULTIPLICAR
-	
-	MOV x,03Ch
-	LEA SI, months							
-	CALL MULTIPLICAR
-	
-	LEA SI, months
-	CALL IMPRIMIR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
-;----------------------------------------------calcular la diferencia de dias y pasarla a segundos ------------------------------------------------------------------------
-	
-	SUB dia,01h
-	
-	XOR BX,BX									;limpiar registros
-	;falta validar si es 0
-	MOV BL,dia
-	CALL SEPARAR
-	
-	LEA SI,days								;instanciar
-	CALL ASIGNAR
-	
-	MOV BL, contadorC						; pasar las centenas al resultado de los años
-	MOV [SI], BL
-	
-	MOV x,18h								; el numero por el que se va multiplicar, de dias a minutos 1 min es 86400 segundos
-	MOV largo, 03h							; el largo del resultado
-	LEA SI, days							
-	CALL MULTIPLICAR
-	
-	MOV x,03Ch
-	LEA SI, days							
-	CALL MULTIPLICAR
-	
-	MOV x,03Ch
-	LEA SI, days							
-	CALL MULTIPLICAR
-	
-	LEA SI, days
-	CALL IMPRIMIR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
-	
-;---------------------------------------------- tomar captura de la hora de la computadora------------------------------------------------------------------------	
-	
-	
-	MOV AH,2CH    								; obtenemos la hora del sistema
-	INT 21H
-	
-	MOV minuto, CL								;se guardar los tiempor en variables
-	MOV segundo, DH
-;---------------------------------------------- calcular la diferencia en hora a segundos------------------------------------------------------------------------	
-
-	XOR BX,BX									;limpiar registros
-	;falta validar si es 0
-	MOV BL,CH
-	CALL SEPARAR
-	
-	LEA SI,horas								;instanciar
-	CALL ASIGNAR
-	
-	MOV x,0E10h									; el numero por el que se va multiplicar 
-	MOV largo, 03h								; el largo del resultado
-	LEA SI, horas							
-	CALL MULTIPLICAR
-	
-	LEA SI, horas
-	CALL IMPRIMIR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
-	
-;---------------------------------------------- calcular la diferencia en minutos a segundos------------------------------------------------------------------------
-
-	XOR BX,BX									;limpiar registros
-	;falta validar si es 0
-	MOV BL,minuto
-	CALL SEPARAR
-	
-	LEA SI,minutos								;instanciar
-	CALL ASIGNAR
-	
-	MOV x,03Ch									; el numero por el que se va multiplicar 
-	MOV largo, 03h								; el largo del resultado
-	LEA SI, minutos							
-	CALL MULTIPLICAR
-	
-	LEA SI, minutos
-	CALL IMPRIMIR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
-;---------------------------------------------- pasar los segundos a la cadena ---------------------------------------------------------------------------------
-
-	XOR BX,BX									;limpiar registros
-	;falta validar si es 0
-	MOV BL,segundo
-	CALL SEPARAR
-	
-	LEA SI,segundos								;instanciar
-	CALL ASIGNAR
-	
-	LEA SI, segundos
-	CALL IMPRIMIR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
-;----------------------------------------------sumar cadenas ----------------------------------------------------------------------------------------------------
-
-	LEA SI, years
-	LEA DI, months
-	CALL SUMAR
-	
-	LEA SI, years
-	LEA DI, days
-	CALL SUMAR
-	
-	LEA SI, years
-	LEA DI, horas
-	CALL SUMAR
-	
-	LEA SI, years
-	LEA DI, minutos
-	CALL SUMAR
-	
-	LEA SI, years
-	LEA DI, segundos
-	CALL SUMAR
-	
-	LEA SI, years
-	CALL IMPRIMIR
-	
-
+	CALL CALCULAR
  
 	
 	JMP finalizar
 	
+	CALCULAR PROC 
 	
+		MOV AH,2AH   							; se obtiene la fecha del sistema
+		INT 21H
+		
+		MOV mes, DH								;guardar el mes
+		MOV dia, DL								;guardar el dia
+
+	;----------------------------------------------calcular la diferencia de años y pasarla a segundos ------------------------------------------------------------------------
+
+		SUB CX,7B2h								; restar a los años los años de la fecha base
+		
+		XOR BX, BX								;limpiar registros
+		
+		MOV BL,CL								;mover la diferencia para poder guardarla en la cadena
+		CALL SEPARAR							; la diferencia pasarla a digitos por medio de los contadores
+		
+		LEA SI,years							;instanciar
+		
+		CALL ASIGNAR
+		
+		MOV x,16Dh								; el numero por el que se va multiplicar 
+		MOV largo, 03h							; el largo del resultado
+		LEA SI, years							
+		CALL MULTIPLICAR
+		
+		MOV x,18h
+		LEA SI, years							
+		CALL MULTIPLICAR
+		
+		MOV x,03Ch
+		LEA SI, years							
+		CALL MULTIPLICAR
+		
+		MOV x,03Ch
+		LEA SI, years							
+		CALL MULTIPLICAR
+		
+	;----------------------------------------------calcular la diferencia de meses y pasarla a segundos ------------------------------------------------------------------------
+
+		SUB mes,01h
+		
+		XOR BX,BX									;limpiar registros
+		;falta validar si es 0
+		MOV BL,mes
+		CALL SEPARAR
+		
+		LEA SI,months							;instanciar
+		CALL ASIGNAR
+		
+		MOV x,01Eh								; el numero por el que se va multiplicar, de dias a minutos 1 min es 86400 segundos
+		MOV largo, 03h							; el largo del resultado
+		LEA SI, months							
+		CALL MULTIPLICAR
+		
+		MOV x,18h
+		LEA SI, months							
+		CALL MULTIPLICAR
+		
+		MOV x,03Ch
+		LEA SI, months							
+		CALL MULTIPLICAR
+		
+		MOV x,03Ch
+		LEA SI, months							
+		CALL MULTIPLICAR
+		
+	;----------------------------------------------calcular la diferencia de dias y pasarla a segundos ------------------------------------------------------------------------
+		
+		SUB dia,01h
+		
+		XOR BX,BX									;limpiar registros
+		;falta validar si es 0
+		MOV BL,dia
+		CALL SEPARAR
+		
+		LEA SI,days								;instanciar
+		CALL ASIGNAR
+		
+		MOV BL, contadorC						; pasar las centenas al resultado de los años
+		MOV [SI], BL
+		
+		MOV x,18h								; el numero por el que se va multiplicar, de dias a minutos 1 min es 86400 segundos
+		MOV largo, 03h							; el largo del resultado
+		LEA SI, days							
+		CALL MULTIPLICAR
+		
+		MOV x,03Ch
+		LEA SI, days							
+		CALL MULTIPLICAR
+		
+		MOV x,03Ch
+		LEA SI, days							
+		CALL MULTIPLICAR
+		
+	;---------------------------------------------- tomar captura de la hora de la computadora------------------------------------------------------------------------	
+		
+		
+		MOV AH,2CH    								; obtenemos la hora del sistema
+		INT 21H
+		
+		MOV minuto, CL								;se guardar los tiempor en variables
+		MOV segundo, DH
+	;---------------------------------------------- calcular la diferencia en hora a segundos------------------------------------------------------------------------	
+
+		XOR BX,BX									;limpiar registros
+		;falta validar si es 0
+		MOV BL,CH
+		CALL SEPARAR
+		
+		LEA SI,horas								;instanciar
+		CALL ASIGNAR
+		
+		MOV x,0E10h									; el numero por el que se va multiplicar 
+		MOV largo, 03h								; el largo del resultado
+		LEA SI, horas							
+		CALL MULTIPLICAR
+		
+	;---------------------------------------------- calcular la diferencia en minutos a segundos------------------------------------------------------------------------
+
+		XOR BX,BX									;limpiar registros
+		;falta validar si es 0
+		MOV BL,minuto
+		CALL SEPARAR
+		
+		LEA SI,minutos								;instanciar
+		CALL ASIGNAR
+		
+		MOV x,03Ch									; el numero por el que se va multiplicar 
+		MOV largo, 03h								; el largo del resultado
+		LEA SI, minutos							
+		CALL MULTIPLICAR
+		
+	;---------------------------------------------- pasar los segundos a la cadena ---------------------------------------------------------------------------------
+
+		XOR BX,BX									;limpiar registros
+		;falta validar si es 0
+		MOV BL,segundo
+		CALL SEPARAR
+		
+		LEA SI,segundos								;instanciar
+		CALL ASIGNAR
+		
+	;----------------------------------------------sumar cadenas ----------------------------------------------------------------------------------------------------
+
+		LEA SI, years
+		LEA DI, months
+		CALL SUMAR
+		
+		LEA SI, years
+		LEA DI, days
+		CALL SUMAR
+		
+		LEA SI, years
+		LEA DI, horas
+		CALL SUMAR
+		
+		LEA SI, years
+		LEA DI, minutos
+		CALL SUMAR
+		
+		LEA SI, years
+		LEA DI, segundos
+		CALL SUMAR
+		
+		LEA SI, years
+		CALL IMPRIMIR
+		
+	RET
+	CALCULAR ENDP
 	
 
 	MULTIPLICAR PROC NEAR
@@ -380,16 +335,16 @@ program:
 			XOR BX,BX
 			XOR DX,DX
 			
-			MOV DL,[SI]					
-			CMP DL,24h
-			JE incrementar1
+			MOV DL,[SI]					; mover lo que contenga SI  a DL
+			CMP DL,24h					; verficar si lo que tenga SI es igual a dolar, si es igual a dolar se va incrementar un contador de suma sino se va a la opcion 2
+			JE incrementar1				
 			JMP opcion2
 			
 			incrementar1:
 				INC contSuma
 			
-			opcion2:
-			MOV DH,[DI]
+			opcion2:					; mover lo que contenga DI  a DH			
+			MOV DH,[DI]					; verficar si lo que tenga SI es igual a dolar, si es igual a dolar se va incrementar un contador de suma sino se va a la opcion 2
 			CMP DH,24h
 			JE incrementar2
 			JMP verificar
