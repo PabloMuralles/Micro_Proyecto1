@@ -1,4 +1,4 @@
-model small								;declaracion de model
+ model small								;declaracion de model
 .data										;inicia segmento de datos
  
 	UUID DB 500 DUP('$') 
@@ -85,36 +85,39 @@ program:
         
         CMP CL,0Dh
         JE signo
-        JNE procedimiento
-        
+		
+		CMP CL,14h
+		JE numero
+		JMP procedimiento
+		
+       
         signo:
 		MOV AH, 02h								; se imprimir el guion
 		MOV DL, 02Dh		
 		INT 21h
 		JMP continuar
   
-        
-        
+        numero:
+        MOV AH, 02h								; se imprimir el guion
+		MOV DL, 31h		
+		INT 21h
+		JMP continuar
+		
+		
         procedimiento:
         MOV AL,[SI]
-		;MOV TEMP, AL
 		MOV BL,contUUI
 		MUL BL
 		
 		XOR BX,BX
 		MOV BL,10h
 		
-		DIV BL
+		DIV BX
 		
 		XOR BX,BX
-		MOV BL,AH
+		MOV BL,DL
 		
-		CALL SEPARAR
-		
-		MOV AH, 02h								
-		MOV DL, contadorU	
-		ADD DL, 30h		
-		INT 21h
+		CALL IMPRIMIR2
         
         continuar:
 		INC SI
@@ -128,6 +131,29 @@ program:
 
 	
 	JMP finalizar
+	
+	IMPRIMIR2 PROC 
+		CMP BL,09h
+		JLE resultado1
+		JMP resultado2
+		
+		resultado1:
+			MOV AH, 02h								
+			MOV DL, BL	
+			ADD DL, 30h		
+			INT 21h
+			JMP retornars
+		
+		resultado2:
+			MOV AH, 02h								
+			MOV DL, BL	
+			ADD DL, 57h		
+			INT 21h
+			JMP retornars
+		
+		retornars:
+	RET
+	IMPRIMIR2 ENDP
 	
 	
 	COPIAR PROC 
