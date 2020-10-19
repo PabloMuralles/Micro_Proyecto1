@@ -13,6 +13,8 @@ model small								;declaracion de modelo
 	contadorU DB 00h
 	mes DB 00h
 	dia DB 00h
+	minuto DB 00h
+	segundo DB 00h
 	carry DW 00h
 	i DW 00h
 	x DW 00h
@@ -145,7 +147,77 @@ program:
 	MOV AH, 02h
 	INT 21h
 	
-;----------------------------------------------sumar cadenas ------------------------------------------------------------------------	
+;---------------------------------------------- tomar captura de la hora de la computadora------------------------------------------------------------------------	
+	
+	
+	MOV AH,2CH    								; obtenemos la hora del sistema
+	INT 21H
+	
+	MOV minuto, CL								;se guardar los tiempor en variables
+	MOV segundo, DH
+;---------------------------------------------- calcular la diferencia en hora a segundos------------------------------------------------------------------------	
+
+	XOR BX,BX									;limpiar registros
+	;falta validar si es 0
+	MOV BL,CH
+	CALL SEPARAR
+	
+	LEA SI,horas								;instanciar
+	CALL ASIGNAR
+	
+	MOV x,0E10h									; el numero por el que se va multiplicar 
+	MOV largo, 03h								; el largo del resultado
+	LEA SI, horas							
+	CALL MULTIPLICAR
+	
+	LEA SI, horas
+	CALL IMPRIMIR
+	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
+	
+;---------------------------------------------- calcular la diferencia en minutos a segundos------------------------------------------------------------------------
+
+	XOR BX,BX									;limpiar registros
+	;falta validar si es 0
+	MOV BL,minuto
+	CALL SEPARAR
+	
+	LEA SI,minutos								;instanciar
+	CALL ASIGNAR
+	
+	MOV x,03Ch									; el numero por el que se va multiplicar 
+	MOV largo, 03h								; el largo del resultado
+	LEA SI, minutos							
+	CALL MULTIPLICAR
+	
+	LEA SI, minutos
+	CALL IMPRIMIR
+	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
+;---------------------------------------------- pasar los segundos a la cadena ---------------------------------------------------------------------------------
+
+	XOR BX,BX									;limpiar registros
+	;falta validar si es 0
+	MOV BL,segundo
+	CALL SEPARAR
+	
+	LEA SI,segundos								;instanciar
+	CALL ASIGNAR
+	
+	LEA SI, segundos
+	CALL IMPRIMIR
+	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
+;----------------------------------------------sumar cadenas ----------------------------------------------------------------------------------------------------
 
 	LEA SI, years
 	LEA DI, months
@@ -156,7 +228,21 @@ program:
 	CALL SUMAR
 	
 	LEA SI, years
+	LEA DI, horas
+	CALL SUMAR
+	
+	LEA SI, years
+	LEA DI, minutos
+	CALL SUMAR
+	
+	LEA SI, years
+	LEA DI, segundos
+	CALL SUMAR
+	
+	LEA SI, years
 	CALL IMPRIMIR
+	
+
  
 	
 	JMP finalizar
