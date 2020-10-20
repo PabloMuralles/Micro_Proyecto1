@@ -1,5 +1,5 @@
-model small								;declaracion de model
-.data										;inicia segmento de datos
+ model small								;declaracion de model
+.data									;inicia segmento de datos
  
 	UUID DB 500 DUP('$') 
 	timeStamp1 DB 500 DUP('$') 
@@ -68,8 +68,7 @@ program:
 	
 	MOV random, DH								;guardamos los segundos
 	
-	XOR CX,CX 
-	;MOV CL, 09h		
+	XOR CX,CX 		
 	MOV CL, 24h		
 	
 	LEA SI, UUID
@@ -111,8 +110,7 @@ program:
 		INT 21h
 		JMP continuar
 		
-		
-		numero2:-
+		numero2:
 		CALL NUM2								;se llama a la funcion y se imprimir un numero del rango
 		JMP continuar
 	
@@ -130,18 +128,12 @@ program:
 		MOV BL,DL
 		
 		CALL IMPRIMIR2
-	
-        
+
         continuar:								; incrementar el contador y el si
 		INC SI
 		INC contUUI
 	
-	
-	
 	LOOP ciclo10
-	
-
-
 	
 	JMP finalizar								
 
