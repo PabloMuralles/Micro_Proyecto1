@@ -1,4 +1,4 @@
- model small								;declaracion de model
+model small								;declaracion de model
 .data										;inicia segmento de datos
  
 	UUID DB 500 DUP('$') 
@@ -35,14 +35,6 @@ program:
 	
 	CALL CALCULAR							; se calcula el primer timestamp
 	
-	LEA SI, years
-	CALL IMPRIMIR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
-	
 	LEA SI, UUID							;se copia el timestamp en el uuid por primera vez
 	LEA DI, years
 	CALL COPIAR
@@ -62,6 +54,13 @@ program:
 	LEA DI, years							;se copia el timestamp en el uuid por cuarta vez
 	CALL COPIAR
 	
+	LEA SI, UUID
+	CALL IMPRIMIR
+	
+	;imprimir salto de linea
+	MOV DL, 0AH
+	MOV AH, 02h
+	INT 21h
 	
 	XOR CX,CX 
 	;MOV CL, 09h		
@@ -86,8 +85,11 @@ program:
         CMP CL,0Dh
         JE signo
 		
-		CMP CL,14h
-		JE numero
+		CMP CL,16h
+		JE numero1
+		
+		CMP CL,11h
+		JE numero2
 		JMP procedimiento
 		
        
@@ -97,12 +99,27 @@ program:
 		INT 21h
 		JMP continuar
   
-        numero:
+        numero1:
         MOV AH, 02h								; se imprimir el guion
 		MOV DL, 31h		
 		INT 21h
 		JMP continuar
 		
+		
+		numero2:
+		MOV AL,[SI]
+		MOV BL,contUUI
+		ADD AL,BL
+		
+		XOR BX,BX
+		MOV BL,04h
+		DIV BL 
+		
+		XOR BX,BX
+		MOV BL,AH
+		
+		CALL IMPRIMIR3
+		JMP continuar
 		
         procedimiento:
         MOV AL,[SI]
@@ -131,6 +148,48 @@ program:
 
 	
 	JMP finalizar
+	
+	IMPRIMIR3 PROC 
+		CMP BL,01h
+		JE result1
+		
+		CMP BL,02h
+		JE result2
+		
+		CMP BL,03h
+		JE result3
+		JMP result4
+		
+		result1:
+			MOV AH, 02h								
+			MOV DL, 38h		
+			INT 21h
+			JMP retornars1
+		
+		result2:
+			MOV AH, 02h								
+			MOV DL, 39h		
+			INT 21h
+			JMP retornars1
+			
+		result3:
+			MOV AH, 02h								
+			MOV DL, 61h	
+			INT 21h
+			JMP retornars1
+			
+		result4:
+			MOV AH, 02h								
+			;MOV DL, 62h
+			MOV DL, BL			
+			INT 21h
+			JMP retornars1
+		
+		retornars1:
+		
+		
+	RET
+	IMPRIMIR3 ENDP
 	
 	IMPRIMIR2 PROC 
 		CMP BL,09h
