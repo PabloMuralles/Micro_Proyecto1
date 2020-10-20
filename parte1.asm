@@ -24,10 +24,11 @@ model small								;declaracion de model
 	largo DW 01h
 	contSuma DB 00h
 	contUUI DB 01h
-	TEMP DB 01h
+	random DB 00h
 	
 .stack						
 .code 
+.386
 
 program: 
 	MOV AX,@DATA							;obtenemos la direccion de inicio
@@ -62,6 +63,11 @@ program:
 	MOV AH, 02h
 	INT 21h
 	
+	MOV AH,2CH    								; obtenemos la hora del sistema
+	INT 21H
+	
+	MOV random, DH								;guardamos los segundos
+	
 	XOR CX,CX 
 	;MOV CL, 09h		
 	MOV CL, 24h		
@@ -73,22 +79,22 @@ program:
 		XOR BX,BX				
 		XOR DX,DX
 		
-		CMP CL,1Ch
+		CMP CL,1Ch								;se compara si se esta en la posicion donde debe de ir un guion
         JE signo
         
-        CMP CL,17h
+        CMP CL,17h								;se compara si se esta en la posicion donde debe de ir un guion
         JE signo
         
-        CMP CL,12h
+        CMP CL,12h								;se compara si se esta en la posicion donde debe de ir un guion
         JE signo
         
-        CMP CL,0Dh
+        CMP CL,0Dh								;se compara si se esta en la posicion donde debe de ir un guion
         JE signo
 		
-		CMP CL,16h
+		CMP CL,16h								;se compara si se esta en la posicion donde debe de ir un 1
 		JE numero1
 		
-		CMP CL,11h
+		CMP CL,11h								;se compara si se esta en la posicion donde puede ir 8,9,a,b
 		JE numero2
 		JMP procedimiento
 		
@@ -106,22 +112,11 @@ program:
 		JMP continuar
 		
 		
-		numero2:
-		MOV AL,[SI]
-		MOV BL,contUUI
-		ADD AL,BL
-		
-		XOR BX,BX
-		MOV BL,04h
-		DIV BL 
-		
-		XOR BX,BX
-		MOV BL,AH
-		
-		CALL IMPRIMIR3
+		numero2:-
+		CALL NUM2								;se llama a la funcion y se imprimir un numero del rango
 		JMP continuar
-		
-        procedimiento:
+	
+        procedimiento:							; se imprimir un numero en base al timestamp para generar el uuid
         MOV AL,[SI]
 		MOV BL,contUUI
 		MUL BL
@@ -135,8 +130,9 @@ program:
 		MOV BL,DL
 		
 		CALL IMPRIMIR2
+	
         
-        continuar:
+        continuar:								; incrementar el contador y el si
 		INC SI
 		INC contUUI
 	
@@ -147,9 +143,36 @@ program:
 
 
 	
-	JMP finalizar
+	JMP finalizar								
+
+	NUM2 PROC 
+		; procedimiento que calcula el numero que puede ser 8,9,a,b
+		
+		MOV AL,[SI]
+		ADD AL,random
+		
+		step:
+		
+		XOR BX,BX					;calcular el mood con restas
+		MOV BL,04h
+		SUB AX,BX
+		CMP AX,00h
+		JL guardar
+		JMP step
+		
+		guardar:
+		ADD AX,BX
+		MOV BL,AL
+		
+		CALL IMPRIMIR3
+		
+		
+	RET
+	NUM2 ENDP
+	
 	
 	IMPRIMIR3 PROC 
+		; en base al mood de num2 se imprime alguno de las posibilidades 8,9,a,b
 		CMP BL,01h
 		JE result1
 		
@@ -168,7 +191,7 @@ program:
 		
 		result2:
 			MOV AH, 02h								
-			MOV DL, 39h		
+			MOV DL, 39h
 			INT 21h
 			JMP retornars1
 			
@@ -180,8 +203,7 @@ program:
 			
 		result4:
 			MOV AH, 02h								
-			;MOV DL, 62h
-			MOV DL, BL			
+			MOV DL, 62h		
 			INT 21h
 			JMP retornars1
 		
@@ -192,6 +214,7 @@ program:
 	IMPRIMIR3 ENDP
 	
 	IMPRIMIR2 PROC 
+		; procedimiento que imprime numeros del 0 al 9 y los numero del 10 al 15 en letras 
 		CMP BL,09h
 		JLE resultado1
 		JMP resultado2
@@ -514,29 +537,17 @@ program:
 	RET
 	SEPARAR ENDP
 	
-	IMPRIMIR PROC 
-		MOV x,00h							;inicializar variables
-		ciclo4:
-			XOR AX,AX						;limpiar registros
-			MOV AL,[SI]						; mover a al si 
-			CMP AL,24h						; comparar que no sea $
-			JE decrementar					; se va a imprimir
-			INC SI							;incrementar registros
-			INC x
-		JMP ciclo4
-		decrementar:						;decrementar
-			DEC SI	
+	IMPRIMIR PROC 	
 		ciclo5:
 			XOR AX,AX						;limpiar registros
-			MOV AX, x						; mover contador a al
-			CMP AL,00h						; comparar que no se 0
-			JE final 						; salirser del ciclo
+			MOV AL,[SI]
+			CMP AL,24h
+			JE final
 			MOV AH,02h						; imprimir caracter
 			MOV DL,[SI]
 			ADD DL,30h
 			INT 21h
-			DEC x							;decrementar variables
-			DEC SI
+			INC SI
 		JMP ciclo5
 		final:
 	RET
