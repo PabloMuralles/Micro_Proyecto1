@@ -1,4 +1,4 @@
- model small								;declaracion de model
+model small								;declaracion de model
 .data									;inicia segmento de datos
  
 	UUID DB 500 DUP('$') 
@@ -28,7 +28,7 @@
 	
 .stack						
 .code 
-.386
+
 
 program: 
 	MOV AX,@DATA							;obtenemos la direccion de inicio
@@ -54,14 +54,6 @@ program:
 	CALL ENCONTRAR
 	LEA DI, years							;se copia el timestamp en el uuid por cuarta vez
 	CALL COPIAR
-	
-	LEA SI, UUID
-	CALL IMPRIMIR
-	
-	;imprimir salto de linea
-	MOV DL, 0AH
-	MOV AH, 02h
-	INT 21h
 	
 	MOV AH,2CH    								; obtenemos la hora del sistema
 	INT 21H
